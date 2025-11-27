@@ -1,0 +1,44 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Barbero {
+  id         Int          @id @default(autoincrement())
+  nombre     String       @unique
+  fotoUrl    String       @default("/img/logo.png")
+  bio        String?
+  password   String       @default("1234") // <--- ESTO ES LO QUE FALTA
+  rol        String       @default("STAFF") // <--- ESTO TAMBIÉN
+  citas      Cita[]
+  portafolio Portafolio[] // <--- Y ESTO
+}
+
+model Portafolio {
+  id          Int      @id @default(autoincrement())
+  titulo      String
+  imagenUrl   String
+  barberoId   Int
+  barbero     Barbero  @relation(fields: [barberoId], references: [id], onDelete: Cascade)
+}
+
+model Cita {
+  id               String   @id @default(cuid())
+  clienteNombre    String
+  clienteTelefono  String
+  fecha            DateTime 
+  tokenCancelacion String   @unique
+  estado           String   @default("CONFIRMADA")
+  precio           Int      @default(20000)
+
+  barberoId        Int
+  barbero          Barbero  @relation(fields: [barberoId], references: [id])
+  
+  creadoEn         DateTime @default(now())
+}
